@@ -1,43 +1,4 @@
-<script type="text/javascript">
-        var gk_isXlsx = false;
-        var gk_xlsxFileLookup = {};
-        var gk_fileData = {};
-        function filledCell(cell) {
-          return cell !== '' && cell != null;
-        }
-        function loadFileData(filename) {
-        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-            try {
-                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                var firstSheetName = workbook.SheetNames[0];
-                var worksheet = workbook.Sheets[firstSheetName];
-
-                // Convert sheet to JSON to filter blank rows
-                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                // Filter out blank rows (rows where all cells are empty, null, or undefined)
-                var filteredData = jsonData.filter(row => row.some(filledCell));
-
-                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
-                var headerRowIndex = filteredData.findIndex((row, index) =>
-                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-                );
-                // Fallback
-                if (headerRowIndex === -1 || headerRowIndex > 25) {
-                  headerRowIndex = 0;
-                }
-
-                // Convert filtered JSON back to CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
-                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                return csv;
-            } catch (e) {
-                console.error(e);
-                return "";
-            }
-        }
-        return gk_fileData[filename] || "";
-        }
-        </script><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
@@ -64,23 +25,32 @@
       max-width: 1200px;
       margin: 0 auto;
       padding: 0 20px;
+      width: 100%;
     }
 
     /* 導航欄 */
     .navbar {
       background-color: #2C2C2C;
-      padding: 20px 0;
+      padding: 15px 0;
       position: sticky;
       top: 0;
       z-index: 100;
       box-shadow: 0 3px 15px rgba(0, 0, 0, 0.2);
     }
 
+    .navbar__toggle {
+      display: none;
+      font-size: 1.5em;
+      color: #DCC3A1;
+      cursor: pointer;
+      padding: 10px;
+    }
+
     .navbar__list {
       display: flex;
-      justify-content: flex-end; /* 靠右對齊 */
-      gap: 20px; /* 縮小間距，保持整齊 */
-      padding-right: 20px; /* 右側內邊距 */
+      justify-content: flex-end;
+      gap: 20px;
+      padding-right: 20px;
     }
 
     .navbar__link {
@@ -88,7 +58,7 @@
       text-decoration: none;
       font-family: 'Poppins', sans-serif;
       font-weight: 700;
-      font-size: 0.9em; /* 縮小字體 */
+      font-size: 0.9em;
       transition: color 0.3s ease, transform 0.3s ease;
     }
 
@@ -110,6 +80,8 @@
     .hero__logo {
       max-width: 250px;
       margin-bottom: 20px;
+      width: 100%;
+      height: auto;
     }
 
     .hero__title {
@@ -330,6 +302,7 @@
     .testimonials__slides {
       display: flex;
       transition: transform 0.5s ease;
+      width: 100%;
     }
 
     .testimonials__slide {
@@ -566,6 +539,7 @@
       border-radius: 5px;
       font-size: 1em;
       font-family: 'Noto Sans TC', sans-serif;
+      min-height: 44px;
     }
 
     .contact__textarea {
@@ -583,6 +557,7 @@
       font-size: 1.1em;
       cursor: pointer;
       transition: background-color 0.3s ease, transform 0.3s ease;
+      min-height: 44px;
     }
 
     .contact__submit:hover {
@@ -737,9 +712,9 @@
 
     .footer__links {
       display: flex;
-      justify-content: flex-end; /* 靠右對齊 */
-      gap: 20px; /* 縮小間距，保持整齊 */
-      padding-right: 20px; /* 右側內邊距 */
+      justify-content: flex-end;
+      gap: 20px;
+      padding-right: 20px;
     }
 
     .footer__link {
@@ -747,7 +722,7 @@
       text-decoration: none;
       font-family: 'Poppins', sans-serif;
       font-weight: 700;
-      font-size: 0.9em; /* 縮小字體 */
+      font-size: 0.9em;
       transition: color 0.3s ease;
     }
 
@@ -765,6 +740,13 @@
         opacity: 1;
         transform: translateY(0);
       }
+    }
+
+    /* 通用圖片樣式 */
+    img {
+      max-width: 100%;
+      height: auto;
+      display: block;
     }
 
     /* 響應式設計 */
@@ -889,22 +871,56 @@
     }
 
     @media (max-width: 480px) {
+      .navbar__toggle {
+        display: block;
+      }
+
       .navbar__list {
+        display: none;
         flex-direction: column;
         gap: 10px;
-        align-items: flex-end; /* 手機模式下仍靠右 */
+        background-color: #2C2C2C;
+        position: absolute;
+        top: 60px;
+        right: 0;
+        width: 100%;
+        padding: 10px;
+        align-items: flex-end;
+      }
+
+      .navbar__list.active {
+        display: flex;
+      }
+
+      .navbar__link {
+        font-size: 0.75em;
+        padding: 5px;
+      }
+
+      .navbar {
+        padding: 10px 0;
+      }
+
+      .container {
+        padding: 0 15px;
+        overflow-x: hidden;
+      }
+
+      .hero {
+        padding: 40px 0;
       }
 
       .hero__logo {
-        max-width: 200px;
+        max-width: 150px;
       }
 
       .hero__title {
-        font-size: 1.5em;
+        font-size: 1.3em;
+        line-height: 1.4;
       }
 
       .hero__subtitle {
-        font-size: 1em;
+        font-size: 0.9em;
       }
 
       .hero__cta {
@@ -913,9 +929,14 @@
       }
 
       .about,
-      .services {
-        min-height: 300px;
-        padding: 40px 0;
+      .services,
+      .testimonials,
+      .case-studies,
+      .faq,
+      .contact,
+      .map,
+      .news {
+        padding: 30px 0;
       }
 
       .about__title,
@@ -925,6 +946,12 @@
 
       .about__content {
         font-size: 1em;
+      }
+
+      .services__grid,
+      .case-studies__grid,
+      .news__grid {
+        gap: 20px;
       }
 
       .services__item {
@@ -943,21 +970,87 @@
         font-size: 0.9em;
       }
 
+      .testimonials__carousel {
+        max-width: 100%;
+        padding: 0 10px;
+      }
+
+      .testimonials__slide {
+        padding: 15px;
+      }
+
+      .testimonials__avatar {
+        width: 60px;
+        height: 60px;
+      }
+
+      .testimonials__name {
+        font-size: 1.1em;
+      }
+
+      .testimonials__quote {
+        font-size: 0.9em;
+      }
+
+      .testimonials__nav {
+        padding: 8px;
+        font-size: 0.8em;
+      }
+
       .case-studies__image {
-        max-height: 150px;
+        max-height: 120px;
+      }
+
+      .contact__form,
+      .contact__appointment form {
+        padding: 0 10px;
+      }
+
+      .contact__input,
+      .contact__textarea {
+        font-size: 0.9em;
+        padding: 10px;
+      }
+
+      .contact__submit {
+        font-size: 1em;
+        padding: 10px;
       }
 
       .footer__links {
         flex-direction: column;
-        align-items: flex-end; /* 手機模式下仍靠右 */
+        align-items: flex-end;
         gap: 10px;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .container {
+        padding: 0 10px;
+      }
+
+      .hero__title {
+        font-size: 1.2em;
+      }
+
+      .hero__subtitle {
+        font-size: 0.85em;
+      }
+
+      .hero__logo {
+        max-width: 120px;
+      }
+
+      .navbar__link {
+        font-size: 0.7em;
       }
     }
   </style>
 </head>
 <body>
   <header class="navbar">
-    <nav class="navbar__list">
+    <div class="navbar__toggle" onclick="toggleMenu()">☰</div>
+    <nav class="navbar__list" id="nav-list">
       <a href="#about" class="navbar__link">關於我們</a>
       <a href="#services" class="navbar__link">服務項目</a>
       <a href="#testimonials" class="navbar__link">客戶推薦</a>
@@ -1134,6 +1227,11 @@
   </footer>
 
   <script>
+    // 漢堡選單切換
+    function toggleMenu() {
+      document.getElementById('nav-list').classList.toggle('active');
+    }
+
     // 輪播功能
     let currentSlide = 0;
     const slides = document.querySelectorAll('.testimonials__slide');
